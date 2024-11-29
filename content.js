@@ -1,11 +1,33 @@
 const replaceMedia = () => {
-    const imageUrl = chrome.runtime?.getURL?.("chillguy.png") || 
-                    chrome.extension?.getURL?.("chillguy.png") || 
-                    "chillguy.png";
+    const images = [
+        "chillguy.png",
+        "amogus.jpeg",
+        "freak.jpg",
+        "knee.jpeg",
+        "lebron.png",
+        "skibidi-toilet.jpg",
+        "zucc.jpg",
+        "the.JPG",
+        "squidwa.png",
+        "kneesurg.png",
+        "pig.png",
+        "thumbsup.png",
+        "nah.png",
+        "roblox.png",
+        "mango.png",
+        "thosewhoknow.png"
+    ];
+    
+    const getRandomImageUrl = () => {
+        const randomImage = images[Math.floor(Math.random() * images.length)];
+        return chrome.runtime?.getURL?.(randomImage) || 
+               chrome.extension?.getURL?.(randomImage) || 
+               randomImage;
+    };
 
     const mediaSelectors = [
         'img:not([data-rotified])',
-        'video:not([data-rotified])',
+        'video:not([data-rotified])',   
         'iframe[src*="youtube"]:not([data-rotified])',
         'iframe[src*="vimeo"]:not([data-rotified])',
         'div[style*="background-image"]:not([data-rotified])',
@@ -14,20 +36,21 @@ const replaceMedia = () => {
         'gif:not([data-rotified])'
     ];
     const mediaElements = document.querySelectorAll(mediaSelectors.join(','));
-
     mediaElements.forEach((element) => {
         if (element.getAttribute('data-processing')) return;
         element.setAttribute('data-processing', 'true');
         
+        const randomImageUrl = getRandomImageUrl(); // Get a new random image for each element
+        
         const replacementImg = document.createElement('img');
-        replacementImg.src = imageUrl;
-        replacementImg.alt = "Just a chill guy";
+        replacementImg.src = randomImageUrl;
+        replacementImg.alt = "Random meme image";
         replacementImg.style.width = element.offsetWidth ? element.offsetWidth + 'px' : '100%';
         replacementImg.style.height = element.offsetHeight ? element.offsetHeight + 'px' : 'auto';
         replacementImg.setAttribute('data-rotified', 'true');
 
         if (element.tagName.toLowerCase() === 'div') {
-            element.style.backgroundImage = `url(${imageUrl})`;
+            element.style.backgroundImage = `url(${randomImageUrl})`;
             element.setAttribute('data-rotified', 'true');
         } else {
             element.style.display = 'none';
@@ -85,7 +108,7 @@ const observeDOM = () => {
         if (shouldProcess) {
             debouncedReplace();
         }
-    });
+});
 
     observer.observe(document.body, {
         childList: true,

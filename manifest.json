@@ -16,7 +16,24 @@
         "default_icon": "gadagedi.png"
     },
     "web_accessible_resources": [{
-        "resources": ["chillguy.png"],
+        "resources": [
+            "chillguy.png",
+            "amogus.jpeg",
+            "freak.jpg",
+            "knee.jpeg",
+            "lebron.png",
+            "skibidi-toilet.jpg",
+            "zucc.jpg",
+            "squidwa.png",
+            "the.JPG",
+            "kneesurg.png",
+            "pig.png",
+            "thumbsup.png",
+            "nah.png",
+            "roblox.png",
+            "mango.png",
+            "thosewhoknow.png"
+        ],
         "matches": ["<all_urls>"]
     }]
 }
