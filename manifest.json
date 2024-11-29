@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "Rotify",
+    "version": "1.0",
+    "description": "To utilize balkan rage to sigma up your current tab",
+    "permissions": ["activeTab", "scripting"],
+    "host_permissions": ["https://*/*", "http://*/*"],
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ],
+    "action": {
+        "default_popup": "index.html",
+        "default_icon": "gadagedi.png"
+    },
+    "web_accessible_resources": [{
+        "resources": ["chillguy.png"],
+        "matches": ["<all_urls>"]
+    }]
+}
