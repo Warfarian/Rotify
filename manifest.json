@@ -3,8 +3,12 @@
     "name": "Rotify",
     "version": "1.0",
     "description": "To use your balkan rage and inner alpha to sigma up your current tab",
-    "permissions": ["activeTab", "scripting"],
-    "host_permissions": ["https://*/*", "http://*/*"],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "permissions": ["activeTab", "scripting", "webRequest", "webNavigation","background"],
+    "host_permissions": ["https://*/*", "http://*/*", "https://*.googleapis.com/*"],
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
@@ -32,9 +36,10 @@
             "images/nah.png",
             "images/roblox.png",
             "images/mango.png",
-            "images/thosewhoknow.png",  
+            "images/thosewhoKnow.png",  
             "images/don.jpeg",
-            "images/donpollo.png"
+            "images/donpollo.png",
+            "config.js"
         ],
         "matches": ["<all_urls>"]
     }]
