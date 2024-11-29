@@ -15,7 +15,9 @@ const replaceMedia = () => {
         "nah.png",
         "roblox.png",
         "mango.png",
-        "thosewhoknow.png"
+        "thosewhoknow.png",
+        "don.jpeg",
+        "donpollo.png"
     ];
     
     const getRandomImageUrl = () => {
