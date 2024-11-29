@@ -1,23 +1,23 @@
 const replaceMedia = () => {
     const images = [
-        "chillguy.png",
-        "amogus.jpeg",
-        "freak.jpg",
-        "knee.jpeg",
-        "lebron.png",
-        "skibidi-toilet.jpg",
-        "zucc.jpg",
-        "the.JPG",
-        "squidwa.png",
-        "kneesurg.png",
-        "pig.png",
-        "thumbsup.png",
-        "nah.png",
-        "roblox.png",
-        "mango.png",
-        "thosewhoknow.png",
-        "don.jpeg",
-        "donpollo.png"
+        "images/chillguy.png",
+        "images/amogus.jpeg",
+        "images/freak.jpg",
+        "images/knee.jpeg",
+        "images/lebron.png",
+        "images/skibidi-toilet.jpg",
+        "images/zucc.jpg",
+        "images/squidwa.png",
+        "images/the.JPG",
+        "images/kneesurg.png",
+        "images/pig.png",
+        "images/thumbsup.png",
+        "images/nah.png",
+        "images/roblox.png",
+        "images/mango.png",
+        "images/thosewhoknow.png",  
+        "images/don.jpeg",
+        "images/donpollo.png"
     ];
     
     const getRandomImageUrl = () => {
