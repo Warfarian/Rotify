@@ -1,19 +1,17 @@
 import { GOOGLE_API_KEY } from './config.js';
 
-// Remove the hardcoded API key and load it from config.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'transformText') {
         console.log('Background received request:', request);
         
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
-        myHeaders.append("x-goog-api-key", GOOGLE_API_KEY);
 
         const raw = JSON.stringify({
             "contents": [{
                 "role": "user",
                 "parts": [{
-                    "text": `Take this text and rewrite it with maximum internet meme energy, using words like sigma, skibidi, rizz, gyatt, kai cenat, baby gronk: ${request.text}`
+                    "text": `Take this text and rewrite it with maximum internet meme energy, using words like sigma, skibidi, rizz, gyatt, kai cenat, baby gronk, do not return anything in bold as it results in ** being displayed: ${request.text}`
                 }]
             }],
             "generationConfig": {
@@ -28,7 +26,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             body: raw
         };
 
-        fetch("https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent", requestOptions)
+        fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GOOGLE_API_KEY}`, requestOptions)
             .then(async response => {
                 const data = await response.json();
                 console.log('Complete response structure:', JSON.stringify(data, null, 2));

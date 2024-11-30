@@ -1,13 +1,18 @@
 // content.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'transformText') {
-        fetch("https://api.unify.ai/v0/chat/completions", {
+        fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${window.config.GOOGLE_API_KEY}`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${window.config.UNIFY_API_KEY}`
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify(request.data)
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: request.data
+                    }]
+                }]
+            })
         })
         .then(response => response.json())
         .then(result => {
@@ -73,18 +78,47 @@ const rotifyApp = {
             return chrome.runtime.getURL(randomImage);
         };
 
-        document.querySelectorAll('img:not([data-rotified])').forEach(img => {
-            img.src = getRandomImage();
-            img.setAttribute('data-rotified', 'true');
+        const imageSelectors = [
+            'img:not([data-rotified])',
+            'div[style*="background-image"]:not([data-rotified])',
+            '.thumbnail:not([data-rotified])',
+            'div[class*="thumb"]:not([data-rotified])',
+            'div[class*="avatar"]:not([data-rotified])',
+            'div[class*="preview"]:not([data-rotified])',
+            '.wp-post-thumbnail:not([data-rotified])',
+            '.attachment-post-thumbnail:not([data-rotified])',
+            'img[src*="framerusercontent"]:not([data-rotified])',
+            'img[src*="framer"]:not([data-rotified])',
+            '[style*="framerusercontent"]:not([data-rotified])'
+        ];
+
+        imageSelectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(element => {
+                if (element.tagName.toLowerCase() === 'img') {
+                    const newImage = getRandomImage();
+                    element.src = newImage;
+                    element.srcset = '';
+                    element.sizes = '';
+                } else {
+                    element.style.backgroundImage = `url('${getRandomImage()}')`;
+                }
+                element.setAttribute('data-rotified', 'true');
+            });
         });
     },
 
     // Process page text
     processText: async () => {
-        const textElements = document.querySelectorAll('p, h1, h2, h3, span:not([data-rotified])');
+        // Target a broader range of text-containing elements, but exclude already transformed ones
+        const textElements = document.querySelectorAll('p:not(.rotified-text), h1:not(.rotified-text), h2:not(.rotified-text), h3:not(.rotified-text), h4:not(.rotified-text), h5:not(.rotified-text), h6:not(.rotified-text), span:not(.rotified-text), div:not(.rotified-text), a:not(.rotified-text), li:not(.rotified-text), td:not(.rotified-text), th:not(.rotified-text), label:not(.rotified-text), button:not(.rotified-text)');
         
         for (const element of textElements) {
-            if (element.textContent.trim().length > 10) {
+            // Only process elements that directly contain text (not just child elements)
+            if (element.childNodes.length === 1 && 
+                element.childNodes[0].nodeType === Node.TEXT_NODE && 
+                element.textContent.trim().length > 0 &&
+                !element.classList.contains('rotified-text')) {  // Double-check class
+                
                 try {
                     console.log('Attempting to transform:', element.textContent);
                     const response = await chrome.runtime.sendMessage({
@@ -92,12 +126,10 @@ const rotifyApp = {
                         text: element.textContent
                     });
                     
-                    console.log('API Response:', response);
-                    
                     if (response && response.transformedText) {
                         element.textContent = response.transformedText;
                         element.style.fontFamily = "'Comic Sans MS', cursive";
-                        element.setAttribute('data-rotified', 'true');
+                        element.classList.add('rotified-text');  // Add class instead of data attribute
                         console.log('Text transformed successfully');
                     } else {
                         console.warn('No transformed text in response:', response);
