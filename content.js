@@ -1,4 +1,3 @@
-// content.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'transformText') {
         fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${window.config.GOOGLE_API_KEY}`, {
@@ -70,7 +69,8 @@ const rotifyApp = {
             "images/mango.png",
             "images/thosewhoKnow.png",  
             "images/don.jpeg",
-            "images/donpollo.png"
+            "images/donpollo.png",
+            "images/oiia-oiiaoiiaTransparent.gif"
         ];
 
         const getRandomImage = () => {
@@ -107,17 +107,14 @@ const rotifyApp = {
         });
     },
 
-    // Process page text
     processText: async () => {
-        // Target a broader range of text-containing elements, but exclude already transformed ones
         const textElements = document.querySelectorAll('p:not(.rotified-text), h1:not(.rotified-text), h2:not(.rotified-text), h3:not(.rotified-text), h4:not(.rotified-text), h5:not(.rotified-text), h6:not(.rotified-text), span:not(.rotified-text), div:not(.rotified-text), a:not(.rotified-text), li:not(.rotified-text), td:not(.rotified-text), th:not(.rotified-text), label:not(.rotified-text), button:not(.rotified-text)');
         
         for (const element of textElements) {
-            // Only process elements that directly contain text (not just child elements)
             if (element.childNodes.length === 1 && 
                 element.childNodes[0].nodeType === Node.TEXT_NODE && 
                 element.textContent.trim().length > 0 &&
-                !element.classList.contains('rotified-text')) {  // Double-check class
+                !element.classList.contains('rotified-text')) {  
                 
                 try {
                     console.log('Attempting to transform:', element.textContent);
@@ -129,7 +126,7 @@ const rotifyApp = {
                     if (response && response.transformedText) {
                         element.textContent = response.transformedText;
                         element.style.fontFamily = "'Comic Sans MS', cursive";
-                        element.classList.add('rotified-text');  // Add class instead of data attribute
+                        element.classList.add('rotified-text');  
                         console.log('Text transformed successfully');
                     } else {
                         console.warn('No transformed text in response:', response);
@@ -155,15 +152,11 @@ const rotifyApp = {
             subtree: true
         });
 
-        // Initial processing
         processPage();
     }
 };
-
-// Make rotifyApp available globally
 window.rotifyApp = rotifyApp;
 
-// Start when page loads
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', rotifyApp.init);
 } else {

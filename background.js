@@ -11,7 +11,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             "contents": [{
                 "role": "user",
                 "parts": [{
-                    "text": `Take this text and rewrite it with maximum internet meme energy, using words like sigma, skibidi, rizz, gyatt, kai cenat, baby gronk, do not return anything in bold as it results in ** being displayed: ${request.text}`
+                    "text": `Transform this text into modern internet/meme speak. Use words like:
+                    - sigma, skibidi, rizz, gyatt, kai cenat, baby gronk
+                    - fr fr, no cap, bussin, based, W rizz
+                    - sheesh, ong, npc behavior
+                    
+                    RULES:
+                    1. DO NOT use asterisks (*) or any markdown
+                    2. DO NOT say "provide the text" or ask for text
+                    3. Just transform the given text directly
+                    4. Keep the same general meaning
+                    
+                    Text to transform: ${request.text}`
                 }]
             }],
             "generationConfig": {
