@@ -1,49 +1,8 @@
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'transformText') {
-        fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${window.config.GOOGLE_API_KEY}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: request.data
-                    }]
-                }]
-            })
-        })
-        .then(response => response.json())
-        .then(result => {
-            sendResponse({success: true, data: result});
-        })
-        .catch(error => {
-            sendResponse({success: false, error: error.toString()});
-        });
-        return true; 
-    }
-});
-
-const loadConfig = () => {
-    return new Promise((resolve, reject) => {
-        if (window.config) {
-            resolve();
-            return;
-        }
-
-        const script = document.createElement('script');
-        script.src = chrome.runtime.getURL('config.js');
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Failed to load config script'));
-        (document.head || document.documentElement).appendChild(script);
-    });
-};
-
 const rotifyApp = {
     // Simple debounce function
     debounce: (func, wait) => {
         let timeout;
-        return function(...args) {
+        return function (...args) {
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(this, args), wait);
         };
@@ -67,10 +26,10 @@ const rotifyApp = {
             "images/nah.png",
             "images/roblox.png",
             "images/mango.png",
-            "images/thosewhoKnow.png",  
+            "images/thosewhoKnow.png",
             "images/don.jpeg",
             "images/donpollo.png",
-            "images/oiia-oiiaoiiaTransparent.gif"
+            "images/oiia-oiiaoiiaTransparent.gif",
         ];
 
         const getRandomImage = () => {
@@ -89,50 +48,119 @@ const rotifyApp = {
             '.attachment-post-thumbnail:not([data-rotified])',
             'img[src*="framerusercontent"]:not([data-rotified])',
             'img[src*="framer"]:not([data-rotified])',
-            '[style*="framerusercontent"]:not([data-rotified])'
+            '[style*="framerusercontent"]:not([data-rotified])',
         ];
 
-        imageSelectors.forEach(selector => {
-            document.querySelectorAll(selector).forEach(element => {
-                if (element.tagName.toLowerCase() === 'img') {
+        imageSelectors.forEach((selector) => {
+            document.querySelectorAll(selector).forEach((element) => {
+                if (element.tagName.toLowerCase() === "img") {
                     const newImage = getRandomImage();
                     element.src = newImage;
-                    element.srcset = '';
-                    element.sizes = '';
+                    element.srcset = "";
+                    element.sizes = "";
                 } else {
                     element.style.backgroundImage = `url('${getRandomImage()}')`;
                 }
-                element.setAttribute('data-rotified', 'true');
+                element.setAttribute("data-rotified", "true");
             });
         });
-    },
-
-    processText: async () => {
-        const textElements = document.querySelectorAll('p:not(.rotified-text), h1:not(.rotified-text), h2:not(.rotified-text), h3:not(.rotified-text), h4:not(.rotified-text), h5:not(.rotified-text), h6:not(.rotified-text), span:not(.rotified-text), div:not(.rotified-text), a:not(.rotified-text), li:not(.rotified-text), td:not(.rotified-text), th:not(.rotified-text), label:not(.rotified-text), button:not(.rotified-text)');
-        
-        for (const element of textElements) {
-            if (element.childNodes.length === 1 && 
-                element.childNodes[0].nodeType === Node.TEXT_NODE && 
-                element.textContent.trim().length > 0 &&
-                !element.classList.contains('rotified-text')) {  
-                
-                try {
-                    console.log('Attempting to transform:', element.textContent);
-                    const response = await chrome.runtime.sendMessage({
-                        action: 'transformText',
-                        text: element.textContent
-                    });
-                    
-                    if (response && response.transformedText) {
-                        element.textContent = response.transformedText;
-                        element.style.fontFamily = "'Comic Sans MS', cursive";
-                        element.classList.add('rotified-text');  
-                        console.log('Text transformed successfully');
-                    } else {
-                        console.warn('No transformed text in response:', response);
+    },  
+    // Add this right before the processText method
+    testMessaging: () => {
+        return new Promise((resolve, reject) => {
+            try {
+                chrome.runtime.sendMessage(
+                    { action: "TEST_MESSAGE" },
+                    (response) => {
+                        console.log("TEST MESSAGE RESPONSE:", response);
+                        if (chrome.runtime.lastError) {
+                            console.error("Messaging test failed:", chrome.runtime.lastError);
+                            reject(chrome.runtime.lastError);
+                        } else {
+                            resolve(response);
+                        }
                     }
+                );
+            } catch (error) {
+                console.error("Error sending test message:", error);
+                reject(error);
+            }
+            });
+        },  
+    processText: async () => {
+        const GOOGLE_API_KEY = window.config?.GOOGLE_API_KEY;
+        
+        const transformText = async (text) => {
+            if (!GOOGLE_API_KEY) {
+                throw new Error("No API key configured");
+            }
+
+            const raw = JSON.stringify({
+                "contents": [{
+                    "role": "user",
+                    "parts": [{
+                        "text": `Transform this text into modern internet/meme speak. Use words like:
+                        - sigma, skibidi, rizz, gyatt, kai cenat, baby gronk
+                        - fr fr, no cap, bussin, based, W rizz
+                        - sheesh, ong, npc behavior
+                        
+                        RULES:
+                        1. DO NOT use asterisks (*) or any markdown
+                        2. DO NOT say "provide the text" or ask for text
+                        3. Just transform the given text directly
+                        4. Keep the same general meaning
+                        
+                        Text to transform: ${text}`
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": 0.9,
+                    "maxOutputTokens": 1000
+                }
+            });
+
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GOOGLE_API_KEY}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: raw,
+                }
+            );
+
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error.message || "API Error");
+            }
+
+            if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                return data.candidates[0].content.parts[0].text;
+            }
+            
+            throw new Error("No transformed text found");
+        };
+
+        const textElements = document.querySelectorAll(
+            "p:not(.rotified-text), h1:not(.rotified-text), h2:not(.rotified-text), h3:not(.rotified-text), h4:not(.rotified-text), h5:not(.rotified-text), h6:not(.rotified-text), span:not(.rotified-text), div:not(.rotified-text), a:not(.rotified-text), li:not(.rotified-text), td:not(.rotified-text), th:not(.rotified-text), label:not(.rotified-text), button:not(.rotified-text)"
+        );
+
+        for (const element of textElements) {
+            if (
+                element.childNodes.length === 1 &&
+                element.childNodes[0].nodeType === Node.TEXT_NODE &&
+                element.textContent.trim().length > 0 &&
+                !element.classList.contains("rotified-text")
+            ) {
+                try {
+                    const transformedText = await transformText(element.textContent);
+                    element.textContent = transformedText;
+                    element.style.fontFamily = "'Comic Sans MS', cursive";
+                    element.classList.add("rotified-text");
                 } catch (error) {
-                    console.error('Text transformation failed:', error);
+                    console.error("Text transformation failed:", error);
                 }
             }
         }
@@ -140,7 +168,7 @@ const rotifyApp = {
 
     // Initialize
     init: () => {
-        console.log('Initializing Rotify...');
+        console.log("Initializing Rotify...");
         const processPage = rotifyApp.debounce(() => {
             rotifyApp.replaceMedia();
             rotifyApp.processText();
@@ -149,16 +177,32 @@ const rotifyApp = {
         // Watch for new content
         new MutationObserver(processPage).observe(document.body, {
             childList: true,
-            subtree: true
+            subtree: true,
         });
 
         processPage();
-    }
+    },
 };
-window.rotifyApp = rotifyApp;
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', rotifyApp.init);
+// Config loading
+const loadConfig = () => {
+    return new Promise((resolve, reject) => {
+        if (window.config) {
+            resolve();
+            return;
+        }
+
+        const script = document.createElement("script");
+        script.src = chrome.runtime.getURL("config.js");
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error("Failed to load config script"));
+        (document.head || document.documentElement).appendChild(script);
+    });
+};
+
+// Initialize when ready
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", rotifyApp.init);
 } else {
     rotifyApp.init();
 }
