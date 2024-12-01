@@ -1,6 +1,9 @@
 # Rotify
 ### The one click solution to skibidi your current tab!
 
+## VOTING IS LIVE! 
+[VOTE HERE](https://devpost.com/software/rotify)
+
 ## Features  
 - **Text Transformation**: Converts text content into entertaining transformations using `chrome.runtime.sendMessage`.  
 - **Meme Replacement**: Replaces images and backgrounds with a collection of curated memes.  
